@@ -47,3 +47,13 @@ uv run --locked python --version
 Use `uv run` to run commands inside the project environment. For example, `uv run --locked pytest --version` checks that the test runner is installed.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for code style, commit messages, and shared inference conventions.
+
+## Exact inference smoke test
+
+Run this check from the repository root after setting up `.venv`.
+
+```sh
+.venv/bin/python -m pytest -q tests/test_exact.py::test_alarm_exact_smoke
+```
+
+The test loads the validated ALARM model and queries `LVFAILURE` given `HISTORY=TRUE`. The evidence probability is `0.0545`. The posterior is approximately `0.825688` for `TRUE` and `0.174312` for `FALSE`.
