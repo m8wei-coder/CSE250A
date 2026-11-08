@@ -28,6 +28,20 @@ See the [case selection rationale](docs/QUERY_EVIDENCE_SELECTION.md) and [experi
 
 Measure elapsed time from the start of method setup until the method returns a posterior estimate or reports failure. Include initialization and Gibbs burn-in. Exclude shared model loading, exact inference, TVD calculation, and result writing. Record elapsed time for failed runs as well.
 
+## Experiment runner
+
+Call `alarm_inference.experiment.run_experiment` with a phase and a mapping of sampler functions. Each function receives the shared model and the keyword arguments defined by the `Sampler` protocol. Perform method setup inside the function so the runner can time it. The sampler implementations still need to be connected to this Python entry point.
+
+```python
+from alarm_inference.experiment import run_experiment
+
+run_experiment("smoke", {"rs": rs, "lw": lw, "gibbs": gibbs})
+```
+
+Return a `SamplerResult` with an `ok` status and a posterior keyed by BIF state label on success. Use `zero_accepts`, `zero_total_weight`, or `gibbs_init_failed` with a `None` posterior for expected sampling failures. Include JSON-compatible method diagnostics. For a Gibbs pilot, return one query state per sweep in `query_trace` and include the initial state and number of initialization attempts in the diagnostics.
+
+The runner saves the config, code revision, dependency versions, and exact references in `metadata.json`. It writes one record per run to `runs.jsonl`, including failures with empty posterior and TVD fields. Use a new `output_dir` for a rerun to preserve prior results. The main phase requires the post-pilot Gibbs settings and `status = "ready"` in the configuration.
+
 ## Repository layout
 
 | Directory | Purpose |
