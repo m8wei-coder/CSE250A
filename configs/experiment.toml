@@ -1,0 +1,75 @@
+methods = ["rs", "lw", "gibbs"]
+budget_units = { rs = "generated_samples", lw = "generated_samples", gibbs = "retained_sweeps" }
+
+[model]
+path = "data/alarm.bif"
+sha256 = "701e6c561f71b55669070c29614f0724b761289aa2c4a35bcc97b638ee881fa2"
+
+[rng]
+root_seed = 250
+bit_generator = "PCG64"
+# Use SeedSequence([root_seed, seed_namespace, case_index, method_index, budget, repeat_index]).
+# Indices are zero-based in the configured case and method lists. Save the seed inputs with each run.
+
+[gibbs]
+initialization = "positive_weight_lw"
+# Each sweep updates every unobserved variable once in lexicographic topological order.
+sweep_order = "lexicographic_topological"
+
+[cases.alarm_smoke]
+query = "LVFAILURE"
+evidence = { HISTORY = "TRUE" }
+
+[cases.lvedvolume_common]
+query = "LVEDVOLUME"
+evidence = { STROKEVOLUME = "LOW", CO = "LOW" }
+
+[cases.lvedvolume_rare]
+query = "LVEDVOLUME"
+evidence = { STROKEVOLUME = "LOW", CO = "HIGH" }
+
+[cases.ventalv_common]
+query = "VENTALV"
+evidence = { VENTLUNG = "ZERO", PRESS = "LOW", EXPCO2 = "LOW" }
+
+[cases.ventalv_rare]
+query = "VENTALV"
+evidence = { VENTLUNG = "ZERO", PRESS = "LOW", EXPCO2 = "HIGH" }
+
+[smoke]
+case_ids = ["alarm_smoke"]
+# These settings apply to sampler smoke runs. The VE check is deterministic.
+budgets = [100]
+repeats = 1
+seed_namespace = 0
+output_dir = "results/smoke"
+
+[smoke.gibbs]
+burn_in_sweeps = 0
+init_max_attempts = 5000
+
+[pilot]
+case_ids = ["lvedvolume_common", "lvedvolume_rare", "ventalv_common", "ventalv_rare"]
+# RS and LW use independent runs at each budget. Gibbs uses the long traces below.
+budgets = [100, 1000, 5000]
+repeats = 5
+seed_namespace = 1
+output_dir = "results/pilot"
+
+[pilot.gibbs]
+# Record five chains per case from the first sweep. Use trace_sweeps as the seed budget.
+# Examine shorter prefixes and candidate burn-in cuts within these diagnostic traces.
+trace_sweeps = 10000
+burn_in_sweeps = 0
+init_max_attempts = 5000
+
+[main]
+case_ids = ["lvedvolume_common", "lvedvolume_rare", "ventalv_common", "ventalv_rare"]
+budgets = [100, 1000, 5000, 10000, 50000, 100000]
+repeats = 20
+seed_namespace = 2
+output_dir = "results/main"
+status = "pending_pilot"
+
+[main.gibbs]
+# Set burn_in_sweeps and init_max_attempts after reviewing the pilot, then mark main as ready.

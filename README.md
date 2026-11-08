@@ -24,6 +24,10 @@ The ALARM network was introduced by Beinlich, Suermondt, Chavez, and Cooper in *
 - Use planned budgets of 100, 1,000, 5,000, 10,000, 50,000, and 100,000. Count generated samples for Rejection Sampling and Likelihood Weighting, and retained sweeps after burn-in for Gibbs.
 - Run 20 independent random streams per combination of case, method, and budget. Use separate streams for the pilot, which will also inform Gibbs burn-in and initialization settings.
 
+See the [case selection rationale](docs/QUERY_EVIDENCE_SELECTION.md) and [experiment configuration](configs/experiment.toml). The configuration records the smoke, pilot, and main settings. The pilot records full Gibbs traces from several starting states to choose the main burn-in and initialization limits. Complete those settings before starting main runs.
+
+Measure elapsed time from the start of method setup until the method returns a posterior estimate or reports failure. Include initialization and Gibbs burn-in. Exclude shared model loading, exact inference, TVD calculation, and result writing. Record elapsed time for failed runs as well.
+
 ## Repository layout
 
 | Directory | Purpose |
