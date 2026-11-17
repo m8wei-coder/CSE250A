@@ -2,7 +2,7 @@
 
 CSE 250A final project on approximate inference in discrete Bayesian networks.
 
-We compare Rejection Sampling, Likelihood Weighting, and Gibbs Sampling on ALARM under different sampling budgets and evidence probabilities. Variable Elimination provides the reference posterior and exact evidence probability. We measure total variation distance from the reference posterior, runtime, and failure rate.
+We compare Rejection Sampling, Likelihood Weighting, and Gibbs Sampling on ALARM under different sampling budgets and evidence probabilities. Variable Elimination provides the reference posterior and exact evidence probability. We measure total variation distance from the reference posterior and failure rate.
 
 ## Data
 
@@ -26,16 +26,21 @@ The ALARM network was introduced by Beinlich, Suermondt, Chavez, and Cooper in *
 
 See the [case selection rationale](docs/QUERY_EVIDENCE_SELECTION.md) and [experiment configuration](configs/experiment.toml). The configuration records the smoke, pilot, and main settings. The pilot records full Gibbs traces from several starting states to choose the main burn-in and initialization limits. Complete those settings before starting main runs.
 
-Measure elapsed time from the start of method setup until the method returns a posterior estimate or reports failure. Include initialization and Gibbs burn-in. Exclude shared model loading, exact inference, TVD calculation, and result writing. Record elapsed time for failed runs as well.
-
 ## Experiment runner
 
-Call `alarm_inference.experiment.run_experiment` with a phase and a mapping of sampler functions. Each function receives the shared model and the keyword arguments defined by the `Sampler` protocol. Perform method setup inside the function so the runner can time it. The sampler implementations still need to be connected to this Python entry point.
+Call `alarm_inference.experiment.run_experiment` with a phase and a mapping of sampler functions. All three samplers are implemented and covered by a shared ALARM smoke integration test. Each function receives the shared model and the keyword arguments defined by the `Sampler` protocol.
 
-```python
+Run the following command from `CSE250A/`. This source layout requires `PYTHONPATH=src` for ordinary Python commands. The pytest configuration sets the import path for tests only.
+
+```sh
+PYTHONPATH=src .venv/bin/python - <<'PY'
 from alarm_inference.experiment import run_experiment
+from alarm_inference.samplers.rs import rs
+from alarm_inference.samplers.lw import lw
+from alarm_inference.samplers.gibbs import gibbs
 
-run_experiment("smoke", {"rs": rs, "lw": lw, "gibbs": gibbs})
+print(run_experiment("smoke", {"rs": rs, "lw": lw, "gibbs": gibbs}))
+PY
 ```
 
 Return a `SamplerResult` with an `ok` status and a posterior keyed by BIF state label on success. Use `zero_accepts`, `zero_total_weight`, or `gibbs_init_failed` with a `None` posterior for expected sampling failures. Include JSON-compatible method diagnostics. For a Gibbs pilot, return one query state per sweep in `query_trace` and include the initial state and number of initialization attempts in the diagnostics.
@@ -59,10 +64,10 @@ Use Python 3.12 and `uv`. From the repository root, create the local `.venv` and
 
 ```sh
 uv sync --locked
-uv run --locked python --version
+.venv/bin/python --version
 ```
 
-Use `uv run` to run commands inside the project environment. For example, `uv run --locked pytest --version` checks that the test runner is installed.
+After setup, run `.venv/bin/python -m pytest -q` for the full test suite. For ordinary Python commands, include `PYTHONPATH=src` as in the runner example above.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for code style, commit messages, and shared inference conventions.
 

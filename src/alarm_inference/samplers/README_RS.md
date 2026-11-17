@@ -10,10 +10,15 @@ from alarm_inference.samplers.rs import rs
 
 与 LW、Gibbs 一起沿用仓库根目录 README 的公共入口：
 
+先从 `CSE250A/` 运行 `PYTHONPATH=src .venv/bin/python`，再输入下面的 Python 代码。完整 shell 命令见[仓库 README](../../../README.md)。
+
 ```python
 from alarm_inference.experiment import run_experiment
+from alarm_inference.samplers.rs import rs
+from alarm_inference.samplers.lw import lw
+from alarm_inference.samplers.gibbs import gibbs
 
-run_experiment("main", {"rs": rs, "lw": lw, "gibbs": gibbs})
+run_experiment("smoke", {"rs": rs, "lw": lw, "gibbs": gibbs})
 ```
 
 ## 算法

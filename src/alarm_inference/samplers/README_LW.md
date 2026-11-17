@@ -10,13 +10,19 @@ from alarm_inference.samplers.lw import lw
 
 RS 和 Gibbs 实现也已导入后，沿用仓库根目录 README 的公共入口：
 
+先从 `CSE250A/` 运行 `PYTHONPATH=src .venv/bin/python`，再输入下面的 Python 代码。完整 shell 命令见[仓库 README](../../../README.md)。
+
 ```python
 from alarm_inference.experiment import run_experiment
+from alarm_inference.samplers.rs import rs
+from alarm_inference.samplers.lw import lw
+from alarm_inference.samplers.gibbs import gibbs
 
-run_experiment("main", {"rs": rs, "lw": lw, "gibbs": gibbs})
+run_experiment("smoke", {"rs": rs, "lw": lw, "gibbs": gibbs})
 ```
 
 第一个参数可选 `smoke`、`pilot` 或 `main`。每次调用运行所选阶段中配置的全部方法和实验组合。
+重复运行需指定新的 `output_dir`。
 主实验中 LW 共运行 480 次：四个场景、六个 N、每组 20 次。N 为生成样本数。
 团队主实验需先完成 Gibbs 的 pilot 决策，填写相应设置，并将主实验状态改为 `ready`。
 

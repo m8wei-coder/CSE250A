@@ -10,16 +10,19 @@ from alarm_inference.samplers.gibbs import gibbs
 
 与 RS、LW 一起沿用仓库根目录 README 的公共入口：
 
+先从 `CSE250A/` 运行 `PYTHONPATH=src .venv/bin/python`，再输入下面的 Python 代码。完整 shell 命令见[仓库 README](../../../README.md)。
+
 ```python
 from alarm_inference.experiment import run_experiment
 from alarm_inference.samplers.rs import rs
 from alarm_inference.samplers.lw import lw
 from alarm_inference.samplers.gibbs import gibbs
 
-run_experiment("main", {"rs": rs, "lw": lw, "gibbs": gibbs})
+run_experiment("smoke", {"rs": rs, "lw": lw, "gibbs": gibbs})
 ```
 
 第一个参数可选 `smoke`、`pilot` 或 `main`。每次调用运行所选阶段中配置的全部方法和实验组合。
+重复运行需指定新的 `output_dir`。
 主实验需先记录 pilot 决策，填写 `burn_in_sweeps`、`init_max_attempts`，并将状态改为 `ready`。
 
 ## 算法
@@ -46,8 +49,8 @@ run_experiment("main", {"rs": rs, "lw": lw, "gibbs": gibbs})
 `tests/test_gibbs_long.py` 连续运行两条十万步 ALARM 链并核对状态、计数与重跑前缀。
 
 ```sh
-uv run --locked pytest -q tests/test_gibbs.py tests/test_gibbs_long.py
-uv run --locked pytest -q
+.venv/bin/python -m pytest -q tests/test_gibbs.py tests/test_gibbs_long.py
+.venv/bin/python -m pytest -q
 ```
 
 集成测试直接调用现有 `run_experiment("smoke", ...)`，同时注册真实 RS、LW、Gibbs，
